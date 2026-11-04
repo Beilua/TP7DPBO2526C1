@@ -1,0 +1,156 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f4f4f4;
+    color: #171717;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: #ffffff;
+}
+
+.site-header {
+    padding: 28px 40px;
+    color: #ffffff;
+    background: #b40000;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.brand-logo {
+    width: 82px;
+    height: 82px;
+    object-fit: contain;
+    background: #ffffff;
+    border-radius: 8px;
+}
+
+h1,
+h2,
+h3,
+p {
+    margin-top: 0;
+}
+
+.site-header h1 {
+    margin-bottom: 6px;
+}
+
+.site-header p {
+    margin-bottom: 0;
+}
+
+.navigation {
+    display: flex;
+    gap: 4px;
+    padding: 0 40px;
+    background: #171717;
+}
+
+.navigation a {
+    padding: 16px 20px;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.navigation a:hover {
+    background: #b40000;
+}
+
+.content {
+    padding: 40px;
+}
+
+.alert {
+    padding: 14px 18px;
+    margin-bottom: 28px;
+    border-left: 5px solid;
+}
+
+.alert-success {
+    color: #155724;
+    background: #d4edda;
+    border-color: #28a745;
+}
+
+.alert-danger {
+    color: #721c24;
+    background: #f8d7da;
+    border-color: #dc3545;
+}
+
+.hero {
+    padding: 28px;
+    margin-bottom: 28px;
+    background: #fff3f3;
+    border-left: 6px solid #b40000;
+}
+
+.hero h2 {
+    color: #b40000;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.dashboard-card {
+    padding: 24px;
+    color: #171717;
+    text-decoration: none;
+    border: 1px solid #dddddd;
+    border-top: 5px solid #b40000;
+}
+
+.dashboard-card:hover {
+    background: #fff3f3;
+}
+
+.dashboard-card h3 {
+    color: #b40000;
+}
+
+.site-footer {
+    padding: 20px 40px;
+    color: #ffffff;
+    text-align: center;
+    background: #171717;
+}
+
+.site-footer p {
+    margin-bottom: 0;
+}
+
+@media (max-width: 700px) {
+    .site-header,
+    .content {
+        padding: 24px;
+    }
+
+    .navigation {
+        flex-direction: column;
+        gap: 0;
+        padding: 0;
+    }
+
+    .navigation a {
+        padding: 12px 24px;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
