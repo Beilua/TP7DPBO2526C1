@@ -10,10 +10,10 @@ class Guitar {
     }
 
     /**
-     * Retrieve all guitars ordered by ID descending.
+     * Retrieve all guitars ordered by ID ascending.
      */
     public function getAllGuitars(): array {
-        $stmt = $this->db->query("SELECT * FROM guitars ORDER BY id DESC");
+        $stmt = $this->db->query("SELECT * FROM guitars ORDER BY id ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

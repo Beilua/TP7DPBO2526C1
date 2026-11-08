@@ -10,10 +10,10 @@ class Customer {
     }
 
     /**
-     * Retrieve all customers ordered by ID descending.
+     * Retrieve all customers ordered by ID ascending.
      */
     public function getAllCustomers(): array {
-        $stmt = $this->db->query("SELECT * FROM customers ORDER BY id DESC");
+        $stmt = $this->db->query("SELECT * FROM customers ORDER BY id ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

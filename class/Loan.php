@@ -12,7 +12,7 @@ class Loan {
     }
 
     /**
-     * Retrieve all rental loans with joined guitar and customer details.
+     * Retrieve all rental loans with joined guitar and customer details, ordered by ID ascending.
      */
     public function getAllLoans(): array {
         $sql = "
@@ -29,7 +29,7 @@ class Loan {
             FROM loans
             JOIN guitars ON loans.guitar_id = guitars.id
             JOIN customers ON loans.customer_id = customers.id
-            ORDER BY loans.id DESC
+            ORDER BY loans.id ASC
         ";
 
         $stmt = $this->db->query($sql);
