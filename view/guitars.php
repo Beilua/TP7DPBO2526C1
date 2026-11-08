@@ -110,7 +110,10 @@
 
 <section class="card table-card">
     <div class="card-header">
-        <h3>Inventory List</h3>
+        <div class="card-header-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+            <h3>Inventory Catalog</h3>
+        </div>
         <span class="badge badge-info"><?= count($guitars) ?> guitar(s)</span>
     </div>
 
@@ -124,8 +127,8 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th style="width: 50px;">ID</th>
-                        <th style="width: 70px;">Photo</th>
+                        <th style="width: 65px;">ID</th>
+                        <th style="width: 80px;">Photo</th>
                         <th>Name & Brand</th>
                         <th>Type</th>
                         <th>Condition</th>
@@ -138,31 +141,34 @@
                 <tbody>
                     <?php foreach ($guitars as $g): ?>
                         <tr>
-                            <td><?= (int)$g['id'] ?></td>
+                            <td><span class="id-tag">#<?= (int)$g['id'] ?></span></td>
                             <td>
                                 <?php if (!empty($g['image_path']) && is_file(__DIR__ . '/../' . $g['image_path'])): ?>
                                     <img src="<?= htmlspecialchars($g['image_path']) ?>" alt="<?= htmlspecialchars($g['name']) ?>" class="table-thumbnail">
                                 <?php else: ?>
-                                    <div class="no-photo-badge">No Photo</div>
+                                    <div class="no-photo-badge">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                        <span>No Photo</span>
+                                    </div>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <strong><?= htmlspecialchars($g['name']) ?></strong>
+                                <strong class="table-primary-text"><?= htmlspecialchars($g['name']) ?></strong>
                                 <div class="text-muted"><?= htmlspecialchars($g['brand']) ?></div>
                             </td>
-                            <td><?= htmlspecialchars($g['type']) ?></td>
+                            <td><span class="type-pill"><?= htmlspecialchars($g['type']) ?></span></td>
                             <td>
                                 <span class="badge badge-condition"><?= htmlspecialchars($g['condition_status']) ?></span>
                             </td>
-                            <td>Rp <?= number_format((float)$g['daily_rate'], 0, ',', '.') ?></td>
+                            <td><strong class="rate-text">Rp <?= number_format((float)$g['daily_rate'], 0, ',', '.') ?></strong></td>
                             <td>
-                                <strong><?= (int)$g['available_stock'] ?></strong> / <?= (int)$g['stock'] ?>
+                                <span class="stock-indicator"><strong><?= (int)$g['available_stock'] ?></strong> / <?= (int)$g['stock'] ?></span>
                             </td>
                             <td>
                                 <?php if ($g['availability_status'] === 'Available'): ?>
-                                    <span class="badge badge-success">Available</span>
+                                    <span class="badge badge-success"><span class="badge-dot"></span>Available</span>
                                 <?php else: ?>
-                                    <span class="badge badge-danger">Unavailable</span>
+                                    <span class="badge badge-danger"><span class="badge-dot"></span>Unavailable</span>
                                 <?php endif; ?>
                             </td>
                             <td class="table-actions">

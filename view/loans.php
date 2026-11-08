@@ -134,7 +134,10 @@
 
 <section class="card table-card">
     <div class="card-header">
-        <h3>Rental Transactions</h3>
+        <div class="card-header-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <h3>Rental Transactions</h3>
+        </div>
         <span class="badge badge-info"><?= count($loans) ?> transaction(s)</span>
     </div>
 
@@ -148,7 +151,7 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th style="width: 45px;">ID</th>
+                        <th style="width: 65px;">ID</th>
                         <th>Guitar</th>
                         <th>Customer</th>
                         <th>Loan Date</th>
@@ -162,41 +165,41 @@
                 <tbody>
                     <?php foreach ($loans as $l): ?>
                         <tr>
-                            <td><?= (int)$l['id'] ?></td>
+                            <td><span class="id-tag">#<?= (int)$l['id'] ?></span></td>
                             <td>
                                 <div class="media-cell">
                                     <?php if (!empty($l['guitar_image']) && is_file(__DIR__ . '/../' . $l['guitar_image'])): ?>
                                         <img src="<?= htmlspecialchars($l['guitar_image']) ?>" alt="Guitar" class="table-thumbnail-sm">
                                     <?php endif; ?>
                                     <div>
-                                        <strong><?= htmlspecialchars($l['guitar_name']) ?></strong>
+                                        <strong class="table-primary-text"><?= htmlspecialchars($l['guitar_name']) ?></strong>
                                         <div class="text-muted"><?= htmlspecialchars($l['guitar_brand']) ?> &bull; <?= htmlspecialchars($l['guitar_type']) ?></div>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <strong><?= htmlspecialchars($l['customer_name']) ?></strong>
+                                <strong class="table-primary-text"><?= htmlspecialchars($l['customer_name']) ?></strong>
                                 <div class="text-muted"><?= htmlspecialchars($l['customer_phone']) ?></div>
                             </td>
                             <td><?= htmlspecialchars($l['loan_date']) ?></td>
                             <td><?= htmlspecialchars($l['due_date']) ?></td>
                             <td>
                                 <?php if (!empty($l['return_date'])): ?>
-                                    <?= htmlspecialchars($l['return_date']) ?>
+                                    <span class="return-date-badge"><?= htmlspecialchars($l['return_date']) ?></span>
                                 <?php else: ?>
                                     <span class="text-muted">&mdash;</span>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <strong>Rp <?= number_format((float)$l['total_cost'], 0, ',', '.') ?></strong>
+                                <strong class="rate-text">Rp <?= number_format((float)$l['total_cost'], 0, ',', '.') ?></strong>
                             </td>
                             <td>
                                 <?php if ($l['status'] === 'Active'): ?>
-                                    <span class="badge badge-warning">Active</span>
+                                    <span class="badge badge-warning"><span class="badge-dot"></span>Active</span>
                                 <?php elseif ($l['status'] === 'Returned'): ?>
-                                    <span class="badge badge-success">Returned</span>
+                                    <span class="badge badge-success"><span class="badge-dot"></span>Returned</span>
                                 <?php else: ?>
-                                    <span class="badge badge-danger">Overdue</span>
+                                    <span class="badge badge-danger"><span class="badge-dot"></span>Overdue</span>
                                 <?php endif; ?>
                             </td>
                             <td class="table-actions">

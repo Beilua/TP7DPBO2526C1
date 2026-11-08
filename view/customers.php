@@ -67,7 +67,10 @@
 
 <section class="card table-card">
     <div class="card-header">
-        <h3>Customer Directory</h3>
+        <div class="card-header-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <h3>Customer Directory</h3>
+        </div>
         <span class="badge badge-info"><?= count($customers) ?> customer(s)</span>
     </div>
 
@@ -81,7 +84,7 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th style="width: 50px;">ID</th>
+                        <th style="width: 65px;">ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
@@ -94,18 +97,18 @@
                     <?php foreach ($customers as $c): ?>
                         <?php $activeLoans = $customerModel->getActiveLoansCount((int)$c['id']); ?>
                         <tr>
-                            <td><?= (int)$c['id'] ?></td>
+                            <td><span class="id-tag">#<?= (int)$c['id'] ?></span></td>
                             <td>
-                                <strong><?= htmlspecialchars($c['name']) ?></strong>
+                                <strong class="table-primary-text"><?= htmlspecialchars($c['name']) ?></strong>
                             </td>
                             <td>
-                                <a href="mailto:<?= htmlspecialchars($c['email']) ?>"><?= htmlspecialchars($c['email']) ?></a>
+                                <a href="mailto:<?= htmlspecialchars($c['email']) ?>" class="table-link"><?= htmlspecialchars($c['email']) ?></a>
                             </td>
-                            <td><?= htmlspecialchars($c['phone']) ?></td>
-                            <td><?= nl2br(htmlspecialchars($c['address'])) ?></td>
+                            <td><span class="phone-text"><?= htmlspecialchars($c['phone']) ?></span></td>
+                            <td><span class="address-text"><?= nl2br(htmlspecialchars($c['address'])) ?></span></td>
                             <td>
                                 <?php if ($activeLoans > 0): ?>
-                                    <span class="badge badge-warning"><?= $activeLoans ?> active</span>
+                                    <span class="badge badge-warning"><span class="badge-dot"></span><?= $activeLoans ?> active</span>
                                 <?php else: ?>
                                     <span class="badge badge-secondary">0 active</span>
                                 <?php endif; ?>
