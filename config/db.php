@@ -1,4 +1,5 @@
 <?php
+
 class Database {
     private string $host = 'localhost';
     private string $username = 'root';
@@ -6,8 +7,13 @@ class Database {
     private string $database = 'db_guitar_loan';
     public PDO $conn;
 
-    public function __construct()
+    public function __construct(?PDO $existingConnection = null)
     {
+        if ($existingConnection !== null) {
+            $this->conn = $existingConnection;
+            return;
+        }
+
         try {
             $dsn = "mysql:host={$this->host};dbname={$this->database};charset=utf8mb4";
 
