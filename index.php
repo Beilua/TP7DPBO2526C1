@@ -179,10 +179,24 @@ if ($databaseConnected) {
         <?php include __DIR__ . '/view/header.php'; ?>
 
         <nav class="navigation" aria-label="Main navigation">
-            <a href="index.php" class="<?= $page === 'dashboard' ? 'active' : '' ?>">Dashboard</a>
-            <a href="index.php?page=guitars" class="<?= $page === 'guitars' ? 'active' : '' ?>">Guitars</a>
-            <a href="index.php?page=customers" class="<?= $page === 'customers' ? 'active' : '' ?>">Customers</a>
-            <a href="index.php?page=loans" class="<?= $page === 'loans' ? 'active' : '' ?>">Loans</a>
+            <div class="nav-container">
+                <a href="index.php" class="nav-link <?= $page === 'dashboard' ? 'active' : '' ?>">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="index.php?page=guitars" class="nav-link <?= $page === 'guitars' ? 'active' : '' ?>">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                    <span>Guitars</span>
+                </a>
+                <a href="index.php?page=customers" class="nav-link <?= $page === 'customers' ? 'active' : '' ?>">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Customers</span>
+                </a>
+                <a href="index.php?page=loans" class="nav-link <?= $page === 'loans' ? 'active' : '' ?>">
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span>Loans</span>
+                </a>
+            </div>
         </nav>
 
         <main class="content">
@@ -211,71 +225,114 @@ if ($databaseConnected) {
                 <?php else: ?>
                     <!-- Dashboard Home -->
                     <section class="hero">
-                        <h2>Welcome to Guitar Loan Management</h2>
-                        <p>
-                            Professional guitar rental tracking system. Easily manage inventory stock, customer directory,
-                            and equipment loans with automatic availability and due date management.
-                        </p>
+                        <div class="hero-content">
+                            <h2>Welcome to Guitar Loan Management</h2>
+                            <p>
+                                Professional guitar rental tracking system. Easily manage inventory stock, customer directory,
+                                and equipment loans with automatic availability and due date management.
+                            </p>
+                        </div>
                     </section>
 
                     <section class="stats-grid">
                         <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Total Guitar Models</span>
+                                <div class="stat-icon-badge stat-icon-guitars">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                                </div>
+                            </div>
                             <div class="stat-number"><?= $totalGuitars ?></div>
-                            <div class="stat-label">Total Guitar Models</div>
-                            <div class="stat-subtext"><?= $availableGuitars ?> available in stock</div>
+                            <div class="stat-subtext"><span class="subtext-pill"><?= $availableGuitars ?> available</span> in stock</div>
                         </div>
                         <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Registered Customers</span>
+                                <div class="stat-icon-badge stat-icon-customers">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                </div>
+                            </div>
                             <div class="stat-number"><?= $totalCustomers ?></div>
-                            <div class="stat-label">Registered Customers</div>
                             <div class="stat-subtext">Active renters on file</div>
                         </div>
                         <div class="stat-card stat-card-highlight">
+                            <div class="stat-header">
+                                <span class="stat-label">Active Rentals</span>
+                                <div class="stat-icon-badge stat-icon-rentals">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                </div>
+                            </div>
                             <div class="stat-number"><?= $activeLoans ?></div>
-                            <div class="stat-label">Active Rentals</div>
                             <div class="stat-subtext">
                                 <?php if ($overdueLoans > 0): ?>
-                                    <span class="text-danger"><strong><?= $overdueLoans ?> overdue</strong></span>
+                                    <span class="text-danger font-semibold">⚠️ <?= $overdueLoans ?> overdue</span>
                                 <?php else: ?>
-                                    <span>All on schedule</span>
+                                    <span class="text-success font-semibold">✓ All on schedule</span>
                                 <?php endif; ?>
                             </div>
                         </div>
                         <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Completed Returns</span>
+                                <div class="stat-icon-badge stat-icon-returns">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                </div>
+                            </div>
                             <div class="stat-number"><?= $returnedLoans ?></div>
-                            <div class="stat-label">Completed Returns</div>
                             <div class="stat-subtext">Total past loans returned</div>
                         </div>
                     </section>
 
                     <section class="dashboard-grid">
                         <a class="dashboard-card" href="index.php?page=guitars">
+                            <div class="dashboard-card-top">
+                                <div class="dashboard-card-icon">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                                </div>
+                                <span class="card-badge">Catalog</span>
+                            </div>
                             <h3>Manage Guitars</h3>
                             <p>Browse guitar catalog, upload model photos, and update rental rates and inventory stock.</p>
-                            <span class="card-link">&rarr; Go to Guitars</span>
+                            <span class="card-link">Go to Guitars <span class="arrow">&rarr;</span></span>
                         </a>
                         <a class="dashboard-card" href="index.php?page=customers">
+                            <div class="dashboard-card-top">
+                                <div class="dashboard-card-icon">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                </div>
+                                <span class="card-badge">Directory</span>
+                            </div>
                             <h3>Manage Customers</h3>
                             <p>Register new renters, view customer contact information, and audit active rentals.</p>
-                            <span class="card-link">&rarr; Go to Customers</span>
+                            <span class="card-link">Go to Customers <span class="arrow">&rarr;</span></span>
                         </a>
                         <a class="dashboard-card" href="index.php?page=loans">
+                            <div class="dashboard-card-top">
+                                <div class="dashboard-card-icon">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                                </div>
+                                <span class="card-badge">Transactions</span>
+                            </div>
                             <h3>Manage Loans</h3>
                             <p>Create new rental transactions, track due dates, and process equipment returns.</p>
-                            <span class="card-link">&rarr; Go to Loans</span>
+                            <span class="card-link">Go to Loans <span class="arrow">&rarr;</span></span>
                         </a>
                     </section>
 
                     <?php if (!empty($loans)): ?>
                         <section class="card table-card" style="margin-top: 32px;">
                             <div class="card-header">
-                                <h3>Recent Rental Transactions</h3>
-                                <a href="index.php?page=loans" class="btn btn-sm btn-secondary">View All Loans</a>
+                                <div class="card-header-title">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    <h3>Recent Rental Transactions</h3>
+                                </div>
+                                <a href="index.php?page=loans" class="btn btn-sm btn-secondary">View All Loans &rarr;</a>
                             </div>
                             <div class="table-responsive">
                                 <table class="data-table">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
+                                            <th style="width: 70px;">ID</th>
                                             <th>Guitar</th>
                                             <th>Customer</th>
                                             <th>Loan Date</th>
@@ -286,9 +343,9 @@ if ($databaseConnected) {
                                     <tbody>
                                         <?php foreach (array_slice($loans, 0, 5) as $recentLoan): ?>
                                             <tr>
-                                                <td>#<?= (int)$recentLoan['id'] ?></td>
+                                                <td><span class="id-tag">#<?= (int)$recentLoan['id'] ?></span></td>
                                                 <td>
-                                                    <strong><?= htmlspecialchars($recentLoan['guitar_name']) ?></strong>
+                                                    <strong class="table-primary-text"><?= htmlspecialchars($recentLoan['guitar_name']) ?></strong>
                                                     <span class="text-muted">(<?= htmlspecialchars($recentLoan['guitar_brand']) ?>)</span>
                                                 </td>
                                                 <td><?= htmlspecialchars($recentLoan['customer_name']) ?></td>
@@ -296,11 +353,11 @@ if ($databaseConnected) {
                                                 <td><?= htmlspecialchars($recentLoan['due_date']) ?></td>
                                                 <td>
                                                     <?php if ($recentLoan['status'] === 'Active'): ?>
-                                                        <span class="badge badge-warning">Active</span>
+                                                        <span class="badge badge-warning"><span class="badge-dot"></span>Active</span>
                                                     <?php elseif ($recentLoan['status'] === 'Returned'): ?>
-                                                        <span class="badge badge-success">Returned</span>
+                                                        <span class="badge badge-success"><span class="badge-dot"></span>Returned</span>
                                                     <?php else: ?>
-                                                        <span class="badge badge-danger">Overdue</span>
+                                                        <span class="badge badge-danger"><span class="badge-dot"></span>Overdue</span>
                                                     <?php endif; ?>
                                                 </td>
                                             </tr>
