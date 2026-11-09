@@ -1,12 +1,16 @@
 <?php
 
+// import database configuration
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/Guitar.php';
 require_once __DIR__ . '/Customer.php';
 
+// loan data model class
 class Loan {
+    // database connection attribute
     private PDO $db;
 
+    // constructor setup database connection
     public function __construct(?PDO $db = null) {
         $this->db = $db ?? (new Database())->conn;
     }
@@ -67,16 +71,19 @@ class Loan {
      * Create a new rental transaction and atomically decrement available stock.
      */
     public function createLoan(array $data): int {
+        // extract loan input data
         $guitarId = (int)($data['guitar_id'] ?? 0);
         $customerId = (int)($data['customer_id'] ?? 0);
         $loanDate = trim($data['loan_date'] ?? date('Y-m-d'));
         $dueDate = trim($data['due_date'] ?? '');
         $totalCost = isset($data['total_cost']) && $data['total_cost'] !== '' ? (float)$data['total_cost'] : null;
 
+        // validate guitar and customer selection
         if ($guitarId <= 0 || $customerId <= 0) {
             throw new InvalidArgumentException("Please select a valid guitar and customer.");
         }
 
+        // validate total cost input
         if ($totalCost !== null && $totalCost < 0) {
             throw new InvalidArgumentException("Total cost cannot be negative.");
         }
@@ -85,20 +92,24 @@ class Loan {
             throw new InvalidArgumentException("Loan date and due date are required.");
         }
 
+        // validate due date order
         if (strtotime($dueDate) < strtotime($loanDate)) {
             throw new InvalidArgumentException("Due date cannot be earlier than the loan date.");
         }
 
+        // load selected guitar record
         $guitarModel = new Guitar($this->db);
         $guitar = $guitarModel->getGuitarById($guitarId);
         if (!$guitar) {
             throw new InvalidArgumentException("Selected guitar does not exist.");
         }
 
+        // check guitar availability
         if ((int)$guitar['available_stock'] <= 0 || $guitar['availability_status'] !== 'Available') {
             throw new RuntimeException("Selected guitar is currently out of stock or unavailable.");
         }
 
+        // load selected customer record
         $customerModel = new Customer($this->db);
         $customer = $customerModel->getCustomerById($customerId);
         if (!$customer) {
@@ -111,8 +122,10 @@ class Loan {
             $totalCost = $days * (float)$guitar['daily_rate'];
         }
 
+        // begin loan transaction
         $this->db->beginTransaction();
         try {
+            // insert new loan record
             $stmt = $this->db->prepare("
                 INSERT INTO loans 
                     (guitar_id, customer_id, loan_date, due_date, return_date, status, total_cost)
@@ -138,8 +151,10 @@ class Loan {
                 throw new RuntimeException("Failed to allocate guitar stock; guitar may have just become unavailable.");
             }
 
+            // commit loan transaction
             $this->db->commit();
             return $loanId;
+        // handle transaction exception
         } catch (Exception $e) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
@@ -152,8 +167,10 @@ class Loan {
      * Process guitar return, marking transaction as returned and restoring inventory.
      */
     public function returnLoan(int $id, ?string $returnDate = null): bool {
+        // normalize return date value
         $returnDate = !empty($returnDate) ? trim($returnDate) : date('Y-m-d');
 
+        // begin return transaction
         $this->db->beginTransaction();
         try {
             // Lock the row so a concurrent double submit cannot return it twice
@@ -164,10 +181,12 @@ class Loan {
                 throw new InvalidArgumentException("Loan transaction with ID {$id} not found.");
             }
 
+            // check already returned status
             if ($loan['status'] === 'Returned') {
                 throw new RuntimeException("This loan has already been marked as returned.");
             }
 
+            // mark loan as returned
             $stmt = $this->db->prepare("
                 UPDATE loans 
                 SET return_date = ?, status = 'Returned'
@@ -198,6 +217,7 @@ class Loan {
      * Update an existing loan transaction with proper inventory reconciliation.
      */
     public function updateLoan(int $id, array $data): bool {
+        // begin update transaction
         $this->db->beginTransaction();
         try {
             // Lock the row so concurrent edits cannot apply stock changes twice
@@ -208,6 +228,7 @@ class Loan {
                 throw new InvalidArgumentException("Loan transaction with ID {$id} not found.");
             }
 
+            // merge update input data
             $guitarId = (int)($data['guitar_id'] ?? $loan['guitar_id']);
             $customerId = (int)($data['customer_id'] ?? $loan['customer_id']);
             $loanDate = trim($data['loan_date'] ?? $loan['loan_date']);
@@ -216,6 +237,7 @@ class Loan {
             $returnDate = !empty($data['return_date']) ? trim($data['return_date']) : null;
             $totalCost = isset($data['total_cost']) && $data['total_cost'] !== '' ? (float)$data['total_cost'] : (float)$loan['total_cost'];
 
+            // validate loan status value
             if (!in_array($status, ['Active', 'Returned', 'Overdue'], true)) {
                 throw new InvalidArgumentException("Invalid loan status.");
             }
@@ -224,6 +246,7 @@ class Loan {
                 throw new InvalidArgumentException("Total cost cannot be negative.");
             }
 
+            // validate guitar and customer selection
             if ($guitarId <= 0 || $customerId <= 0) {
                 throw new InvalidArgumentException("Please select a valid guitar and customer.");
             }
@@ -232,6 +255,7 @@ class Loan {
                 throw new InvalidArgumentException("Due date cannot be earlier than loan date.");
             }
 
+            // load target guitar record
             $guitarModel = new Guitar($this->db);
             $targetGuitar = $guitarModel->getGuitarById($guitarId);
             if (!$targetGuitar) {
@@ -308,6 +332,7 @@ class Loan {
                 }
             }
 
+            // update loan record
             $stmt = $this->db->prepare("
                 UPDATE loans
                 SET guitar_id = ?,
@@ -344,6 +369,7 @@ class Loan {
      * Delete a loan record, safely returning allocated stock if the loan was active.
      */
     public function deleteLoan(int $id): bool {
+        // begin delete transaction
         $this->db->beginTransaction();
         try {
             // Lock the row so a concurrent double submit cannot restore stock twice
@@ -365,6 +391,7 @@ class Loan {
                 $stmtStock->execute([$loan['guitar_id']]);
             }
 
+            // delete loan record
             $stmt = $this->db->prepare("DELETE FROM loans WHERE id = ?");
             $deleted = $stmt->execute([$id]);
 
@@ -382,7 +409,9 @@ class Loan {
      * Automatically update active loans that passed their due date to 'Overdue'.
      */
     public function checkAndUpdateOverdueLoans(): int {
+        // get current date value
         $today = date('Y-m-d');
+        // mark overdue loans
         $stmt = $this->db->prepare("
             UPDATE loans 
             SET status = 'Overdue' 

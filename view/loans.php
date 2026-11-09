@@ -8,12 +8,14 @@
 // $loans: array
 ?>
 
+<!-- guitar rental loans page -->
 <div class="page-header">
     <div>
         <h2>Guitar Rental Loans</h2>
         <p class="subtitle">Manage rental transactions, schedules, guitar returns, and statuses.</p>
     </div>
     <?php if ($action !== 'add' && $action !== 'edit'): ?>
+        <!-- show add button -->
         <div>
             <a href="index.php?page=loans&action=add" class="btn btn-primary">+ Rent a Guitar (New Loan)</a>
         </div>
@@ -21,7 +23,10 @@
 </div>
 
 <?php if ($action === 'add' || $action === 'edit'): ?>
+    <!-- show loan form -->
+
     <?php
+    // prepare loan form data
     $isEdit = ($action === 'edit' && !empty($editLoan));
     $availableGuitars = $guitarModel->getAvailableGuitars();
     $allGuitars = $guitarModel->getAllGuitars();
@@ -133,6 +138,7 @@
     </section>
 <?php endif; ?>
 
+<!-- show rental transactions table -->
 <section class="card table-card">
     <div class="card-header">
         <div class="card-header-title">
@@ -143,6 +149,7 @@
     </div>
 
     <?php if (empty($loans)): ?>
+        <!-- show empty loan message -->
         <div class="empty-state">
             <p>No rental loans recorded yet.</p>
             <a href="index.php?page=loans&action=add" class="btn btn-primary">+ Create First Rental</a>
@@ -164,6 +171,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- list loan records -->
                     <?php foreach ($loans as $l): ?>
                         <tr>
                             <td><span class="id-tag">#<?= (int)$l['id'] ?></span></td>

@@ -5,12 +5,14 @@
 // $editGuitar: ?array
 ?>
 
+<!-- guitar inventory page -->
 <div class="page-header">
     <div>
         <h2>Guitar Inventory</h2>
         <p class="subtitle">Manage rentable guitars, specifications, stock, and photos.</p>
     </div>
     <?php if ($action !== 'add' && $action !== 'edit'): ?>
+        <!-- show add button -->
         <div>
             <a href="index.php?page=guitars&action=add" class="btn btn-primary">+ Add New Guitar</a>
         </div>
@@ -18,6 +20,8 @@
 </div>
 
 <?php if ($action === 'add' || $action === 'edit'): ?>
+    <!-- show guitar form -->
+
     <?php $isEdit = ($action === 'edit' && !empty($editGuitar)); ?>
     <section class="card form-card">
         <h3><?= $isEdit ? 'Edit Guitar: ' . htmlspecialchars($editGuitar['name']) : 'Add New Guitar' ?></h3>
@@ -29,6 +33,7 @@
                 <input type="hidden" name="id" value="<?= (int)$editGuitar['id'] ?>">
             <?php endif; ?>
 
+            <!-- show form fields -->
             <div class="form-grid">
                 <div class="form-group">
                     <label for="name">Guitar / Model Name <span class="required">*</span></label>
@@ -109,6 +114,7 @@
     </section>
 <?php endif; ?>
 
+<!-- show guitar inventory table -->
 <section class="card table-card">
     <div class="card-header">
         <div class="card-header-title">
@@ -119,6 +125,7 @@
     </div>
 
     <?php if (empty($guitars)): ?>
+        <!-- show empty inventory message -->
         <div class="empty-state">
             <p>No guitars in inventory yet.</p>
             <a href="index.php?page=guitars&action=add" class="btn btn-primary">+ Add First Guitar</a>
@@ -140,6 +147,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- list guitar records -->
                     <?php foreach ($guitars as $g): ?>
                         <tr>
                             <td><span class="id-tag">#<?= (int)$g['id'] ?></span></td>

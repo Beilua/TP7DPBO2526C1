@@ -5,12 +5,14 @@
 // $editCustomer: ?array
 ?>
 
+<!-- customer management page -->
 <div class="page-header">
     <div>
         <h2>Customer Management</h2>
         <p class="subtitle">Manage customer records, contact information, and rental history.</p>
     </div>
     <?php if ($action !== 'add' && $action !== 'edit'): ?>
+        <!-- show add button -->
         <div>
             <a href="index.php?page=customers&action=add" class="btn btn-primary">+ Add New Customer</a>
         </div>
@@ -18,6 +20,8 @@
 </div>
 
 <?php if ($action === 'add' || $action === 'edit'): ?>
+    <!-- show customer form -->
+
     <?php $isEdit = ($action === 'edit' && !empty($editCustomer)); ?>
     <section class="card form-card">
         <h3><?= $isEdit ? 'Edit Customer: ' . htmlspecialchars($editCustomer['name']) : 'Add New Customer' ?></h3>
@@ -66,6 +70,7 @@
     </section>
 <?php endif; ?>
 
+<!-- show customer directory table -->
 <section class="card table-card">
     <div class="card-header">
         <div class="card-header-title">
@@ -76,11 +81,13 @@
     </div>
 
     <?php if (empty($customers)): ?>
+        <!-- show empty customer message -->
         <div class="empty-state">
             <p>No customer records found.</p>
             <a href="index.php?page=customers&action=add" class="btn btn-primary">+ Add First Customer</a>
         </div>
     <?php else: ?>
+        <!-- load active loan counts -->
         <?php $activeLoanCounts = $customerModel->getActiveLoanCounts(); ?>
         <div class="table-responsive">
             <table class="data-table">
@@ -96,6 +103,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- list customer records -->
                     <?php foreach ($customers as $c): ?>
                         <?php $activeLoans = (int)($activeLoanCounts[(int)$c['id']] ?? 0); ?>
                         <tr>

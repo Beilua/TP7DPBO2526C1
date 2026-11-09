@@ -1,7 +1,9 @@
 <?php
 
+// set application timezone
 date_default_timezone_set('Asia/Jakarta');
 
+// start php session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -11,10 +13,14 @@ require_once __DIR__ . '/class/Guitar.php';
 require_once __DIR__ . '/class/Customer.php';
 require_once __DIR__ . '/class/Loan.php';
 
+// import application classes
+
+// create csrf token
 if (empty($_SESSION['csrf'])) {
     $_SESSION['csrf'] = bin2hex(random_bytes(16));
 }
 
+// store flash message
 function setFlash(string $type, string $message): void {
     $_SESSION['flash'] = [
         'type' => $type,
@@ -22,6 +28,7 @@ function setFlash(string $type, string $message): void {
     ];
 }
 
+// read flash message
 function getFlash(): ?array {
     if (isset($_SESSION['flash'])) {
         $flash = $_SESSION['flash'];
@@ -31,10 +38,12 @@ function getFlash(): ?array {
     return null;
 }
 
+// render csrf hidden field
 function csrfField(): string {
     return '<input type="hidden" name="csrf" value="' . htmlspecialchars($_SESSION['csrf'], ENT_QUOTES, 'UTF-8') . '">';
 }
 
+// verify csrf token
 function csrfVerify(): void {
     if (!isset($_POST['csrf']) || !hash_equals($_SESSION['csrf'], (string)$_POST['csrf'])) {
         setFlash('danger', 'Invalid security token. Please try again.');
@@ -43,12 +52,14 @@ function csrfVerify(): void {
     }
 }
 
+// initialize database state
 $databaseConnected = false;
 $databaseError = null;
 $guitarModel = null;
 $customerModel = null;
 $loanModel = null;
 
+// try connect database
 try {
     $dbInstance = new Database();
     $connection = $dbInstance->conn;
@@ -61,18 +72,21 @@ try {
     // Synchronize overdue loans status
     $loanModel->checkAndUpdateOverdueLoans();
 } catch (PDOException $exception) {
+    // store database error message
     $databaseError = 'Database connection error: ' . $exception->getMessage();
 }
 
 // -------------------------------------------------------------
 // POST Request Handling (CRUD Actions)
 // -------------------------------------------------------------
+// handle form post actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $databaseConnected) {
     csrfVerify();
     $page = $_GET['page'] ?? 'dashboard';
     $postAction = $_POST['action'] ?? '';
 
     try {
+        // handle guitar form actions
         if ($page === 'guitars') {
             if ($postAction === 'create') {
                 $imagePath = $guitarModel->handleImageUpload($_FILES['image'] ?? []);
@@ -97,6 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $databaseConnected) {
             exit;
         }
 
+        // handle customer form actions
         if ($page === 'customers') {
             if ($postAction === 'create') {
                 $customerModel->createCustomer($_POST);
@@ -114,6 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $databaseConnected) {
             exit;
         }
 
+        // handle loan form actions
         if ($page === 'loans') {
             if ($postAction === 'create') {
                 $loanModel->createLoan($_POST);
@@ -135,6 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $databaseConnected) {
             exit;
         }
     } catch (Exception $e) {
+        // show form error message
         setFlash('danger', $e->getMessage());
         header('Location: index.php?page=' . urlencode($page));
         exit;
@@ -144,6 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $databaseConnected) {
 // -------------------------------------------------------------
 // GET Page & Routing Preparation
 // -------------------------------------------------------------
+// prepare page routing data
 $page = $_GET['page'] ?? 'dashboard';
 $action = $_GET['action'] ?? 'list';
 $flash = getFlash();
@@ -155,6 +173,7 @@ $editGuitar = null;
 $editCustomer = null;
 $editLoan = null;
 
+// load data for current page
 if ($databaseConnected) {
     if ($page === 'guitars') {
         $guitars = $guitarModel->getAllGuitars();
@@ -172,6 +191,7 @@ if ($databaseConnected) {
             $editLoan = $loanModel->getLoanById((int)$_GET['id']);
         }
     } elseif ($page === 'dashboard') {
+        // load dashboard summary data
         $guitars = $guitarModel->getAllGuitars();
         $customers = $customerModel->getAllCustomers();
         $loans = $loanModel->getAllLoans();
