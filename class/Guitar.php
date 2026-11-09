@@ -17,7 +17,8 @@ class Guitar {
      * Retrieve all guitars ordered by ID ascending.
      */
     public function getAllGuitars(): array {
-        $stmt = $this->db->query("SELECT * FROM guitars ORDER BY id ASC");
+        $stmt = $this->db->prepare("SELECT * FROM guitars ORDER BY id ASC");
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -25,7 +26,8 @@ class Guitar {
      * Retrieve all guitars that currently have available stock.
      */
     public function getAvailableGuitars(): array {
-        $stmt = $this->db->query("SELECT * FROM guitars WHERE available_stock > 0 ORDER BY name ASC");
+        $stmt = $this->db->prepare("SELECT * FROM guitars WHERE available_stock > 0 ORDER BY name ASC");
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

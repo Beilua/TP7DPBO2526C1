@@ -17,7 +17,8 @@ class Customer {
      * Retrieve all customers ordered by ID ascending.
      */
     public function getAllCustomers(): array {
-        $stmt = $this->db->query("SELECT * FROM customers ORDER BY id ASC");
+        $stmt = $this->db->prepare("SELECT * FROM customers ORDER BY id ASC");
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -166,7 +167,8 @@ class Customer {
      */
     public function getActiveLoanCounts(): array {
         // query active counts per customer
-        $stmt = $this->db->query("SELECT customer_id, COUNT(*) AS active FROM loans WHERE status IN ('Active', 'Overdue') GROUP BY customer_id");
+        $stmt = $this->db->prepare("SELECT customer_id, COUNT(*) AS active FROM loans WHERE status IN ('Active', 'Overdue') GROUP BY customer_id");
+        $stmt->execute();
         // build counts keyed by id
         $counts = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
