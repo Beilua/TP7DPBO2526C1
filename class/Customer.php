@@ -142,6 +142,18 @@ class Customer {
     }
 
     /**
+     * Get active loan counts for all customers in one query, keyed by customer ID.
+     */
+    public function getActiveLoanCounts(): array {
+        $stmt = $this->db->query("SELECT customer_id, COUNT(*) AS active FROM loans WHERE status IN ('Active', 'Overdue') GROUP BY customer_id");
+        $counts = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $counts[(int)$row['customer_id']] = (int)$row['active'];
+        }
+        return $counts;
+    }
+
+    /**
      * Check if an email is already registered, optionally excluding a customer ID for updates.
      */
     public function emailExists(string $email, ?int $excludeId = null): bool {

@@ -7,13 +7,8 @@ class Database {
     private string $database = 'db_guitar_loan';
     public PDO $conn;
 
-    public function __construct(?PDO $existingConnection = null)
+    public function __construct()
     {
-        if ($existingConnection !== null) {
-            $this->conn = $existingConnection;
-            return;
-        }
-
         try {
             $dsn = "mysql:host={$this->host};dbname={$this->database};charset=utf8mb4";
 

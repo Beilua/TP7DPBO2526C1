@@ -23,6 +23,7 @@
         <h3><?= $isEdit ? 'Edit Guitar: ' . htmlspecialchars($editGuitar['name']) : 'Add New Guitar' ?></h3>
         
         <form method="POST" action="index.php?page=guitars" enctype="multipart/form-data" class="app-form">
+            <?= csrfField() ?>
             <input type="hidden" name="action" value="<?= $isEdit ? 'update' : 'create' ?>">
             <?php if ($isEdit): ?>
                 <input type="hidden" name="id" value="<?= (int)$editGuitar['id'] ?>">
@@ -176,6 +177,7 @@
                                     Edit
                                 </a>
                                 <form method="POST" action="index.php?page=guitars" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this guitar?');">
+                                    <?= csrfField() ?>
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
                                     <button type="submit" class="btn btn-sm btn-delete" title="Delete Guitar">

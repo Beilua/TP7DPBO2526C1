@@ -31,6 +31,7 @@
         <h3><?= $isEdit ? 'Edit Loan Transaction #' . (int)$editLoan['id'] : 'Create New Guitar Rental' ?></h3>
 
         <form method="POST" action="index.php?page=loans" class="app-form" id="loanForm">
+            <?= csrfField() ?>
             <input type="hidden" name="action" value="<?= $isEdit ? 'update' : 'create' ?>">
             <?php if ($isEdit): ?>
                 <input type="hidden" name="id" value="<?= (int)$editLoan['id'] ?>">
@@ -205,6 +206,7 @@
                             <td class="table-actions">
                                 <?php if ($l['status'] !== 'Returned'): ?>
                                     <form method="POST" action="index.php?page=loans" style="display:inline;" onsubmit="return confirm('Process return for this guitar? This will restore stock availability.');">
+                                        <?= csrfField() ?>
                                         <input type="hidden" name="action" value="return">
                                         <input type="hidden" name="id" value="<?= (int)$l['id'] ?>">
                                         <button type="submit" class="btn btn-sm btn-success" title="Mark as Returned">
@@ -218,6 +220,7 @@
                                 </a>
 
                                 <form method="POST" action="index.php?page=loans" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this loan record?');">
+                                    <?= csrfField() ?>
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="<?= (int)$l['id'] ?>">
                                     <button type="submit" class="btn btn-sm btn-delete" title="Delete Loan">

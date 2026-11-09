@@ -23,6 +23,7 @@
         <h3><?= $isEdit ? 'Edit Customer: ' . htmlspecialchars($editCustomer['name']) : 'Add New Customer' ?></h3>
         
         <form method="POST" action="index.php?page=customers" class="app-form">
+            <?= csrfField() ?>
             <input type="hidden" name="action" value="<?= $isEdit ? 'update' : 'create' ?>">
             <?php if ($isEdit): ?>
                 <input type="hidden" name="id" value="<?= (int)$editCustomer['id'] ?>">
@@ -80,6 +81,7 @@
             <a href="index.php?page=customers&action=add" class="btn btn-primary">+ Add First Customer</a>
         </div>
     <?php else: ?>
+        <?php $activeLoanCounts = $customerModel->getActiveLoanCounts(); ?>
         <div class="table-responsive">
             <table class="data-table">
                 <thead>
@@ -95,7 +97,7 @@
                 </thead>
                 <tbody>
                     <?php foreach ($customers as $c): ?>
-                        <?php $activeLoans = $customerModel->getActiveLoansCount((int)$c['id']); ?>
+                        <?php $activeLoans = (int)($activeLoanCounts[(int)$c['id']] ?? 0); ?>
                         <tr>
                             <td><span class="id-tag">#<?= (int)$c['id'] ?></span></td>
                             <td>
@@ -118,6 +120,7 @@
                                     Edit
                                 </a>
                                 <form method="POST" action="index.php?page=customers" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this customer?');">
+                                    <?= csrfField() ?>
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="<?= (int)$c['id'] ?>">
                                     <button type="submit" class="btn btn-sm btn-delete" title="Delete Customer">

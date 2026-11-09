@@ -77,6 +77,10 @@ class Loan {
             throw new InvalidArgumentException("Please select a valid guitar and customer.");
         }
 
+        if ($totalCost !== null && $totalCost < 0) {
+            throw new InvalidArgumentException("Total cost cannot be negative.");
+        }
+
         if ($loanDate === '' || $dueDate === '') {
             throw new InvalidArgumentException("Loan date and due date are required.");
         }
@@ -118,11 +122,14 @@ class Loan {
             $stmt->execute([$guitarId, $customerId, $loanDate, $dueDate, $totalCost]);
             $loanId = (int)$this->db->lastInsertId();
 
-            // Decrement available stock
+            // Decrement available stock.
+            // Status is computed from the pre-decrement value FIRST: MariaDB
+            // evaluates SET left to right, and a trailing `available_stock - 1`
+            // in the CASE underflows (error 1690) when claiming the last unit.
             $stmtStock = $this->db->prepare("
                 UPDATE guitars
-                SET available_stock = available_stock - 1,
-                    availability_status = CASE WHEN available_stock - 1 > 0 THEN 'Available' ELSE 'Unavailable' END
+                SET availability_status = CASE WHEN available_stock > 1 THEN 'Available' ELSE 'Unavailable' END,
+                    available_stock = available_stock - 1
                 WHERE id = ? AND available_stock > 0
             ");
             $stmtStock->execute([$guitarId]);
@@ -145,19 +152,22 @@ class Loan {
      * Process guitar return, marking transaction as returned and restoring inventory.
      */
     public function returnLoan(int $id, ?string $returnDate = null): bool {
-        $loan = $this->getLoanById($id);
-        if (!$loan) {
-            throw new InvalidArgumentException("Loan transaction with ID {$id} not found.");
-        }
-
-        if ($loan['status'] === 'Returned') {
-            throw new RuntimeException("This loan has already been marked as returned.");
-        }
-
         $returnDate = !empty($returnDate) ? trim($returnDate) : date('Y-m-d');
 
         $this->db->beginTransaction();
         try {
+            // Lock the row so a concurrent double submit cannot return it twice
+            $stmtLock = $this->db->prepare("SELECT guitar_id, status FROM loans WHERE id = ? FOR UPDATE");
+            $stmtLock->execute([$id]);
+            $loan = $stmtLock->fetch(PDO::FETCH_ASSOC);
+            if (!$loan) {
+                throw new InvalidArgumentException("Loan transaction with ID {$id} not found.");
+            }
+
+            if ($loan['status'] === 'Returned') {
+                throw new RuntimeException("This loan has already been marked as returned.");
+            }
+
             $stmt = $this->db->prepare("
                 UPDATE loans 
                 SET return_date = ?, status = 'Returned'
@@ -188,54 +198,65 @@ class Loan {
      * Update an existing loan transaction with proper inventory reconciliation.
      */
     public function updateLoan(int $id, array $data): bool {
-        $loan = $this->getLoanById($id);
-        if (!$loan) {
-            throw new InvalidArgumentException("Loan transaction with ID {$id} not found.");
-        }
-
-        $guitarId = (int)($data['guitar_id'] ?? $loan['guitar_id']);
-        $customerId = (int)($data['customer_id'] ?? $loan['customer_id']);
-        $loanDate = trim($data['loan_date'] ?? $loan['loan_date']);
-        $dueDate = trim($data['due_date'] ?? $loan['due_date']);
-        $status = trim($data['status'] ?? $loan['status']);
-        $returnDate = !empty($data['return_date']) ? trim($data['return_date']) : null;
-        $totalCost = isset($data['total_cost']) && $data['total_cost'] !== '' ? (float)$data['total_cost'] : (float)$loan['total_cost'];
-
-        if ($guitarId <= 0 || $customerId <= 0) {
-            throw new InvalidArgumentException("Please select a valid guitar and customer.");
-        }
-
-        if (strtotime($dueDate) < strtotime($loanDate)) {
-            throw new InvalidArgumentException("Due date cannot be earlier than loan date.");
-        }
-
-        $guitarModel = new Guitar($this->db);
-        $targetGuitar = $guitarModel->getGuitarById($guitarId);
-        if (!$targetGuitar) {
-            throw new InvalidArgumentException("Target guitar does not exist.");
-        }
-
-        $customerModel = new Customer($this->db);
-        if (!$customerModel->getCustomerById($customerId)) {
-            throw new InvalidArgumentException("Target customer does not exist.");
-        }
-
-        // Handle return date semantics based on status
-        if ($status === 'Returned') {
-            if (empty($returnDate)) {
-                $returnDate = date('Y-m-d');
-            }
-        } else {
-            $returnDate = null;
-        }
-
-        // Inventory state transition
-        $oldGuitarId = (int)$loan['guitar_id'];
-        $oldHolding = ($loan['status'] !== 'Returned');
-        $newHolding = ($status !== 'Returned');
-
         $this->db->beginTransaction();
         try {
+            // Lock the row so concurrent edits cannot apply stock changes twice
+            $stmtLock = $this->db->prepare("SELECT * FROM loans WHERE id = ? FOR UPDATE");
+            $stmtLock->execute([$id]);
+            $loan = $stmtLock->fetch(PDO::FETCH_ASSOC);
+            if (!$loan) {
+                throw new InvalidArgumentException("Loan transaction with ID {$id} not found.");
+            }
+
+            $guitarId = (int)($data['guitar_id'] ?? $loan['guitar_id']);
+            $customerId = (int)($data['customer_id'] ?? $loan['customer_id']);
+            $loanDate = trim($data['loan_date'] ?? $loan['loan_date']);
+            $dueDate = trim($data['due_date'] ?? $loan['due_date']);
+            $status = trim($data['status'] ?? $loan['status']);
+            $returnDate = !empty($data['return_date']) ? trim($data['return_date']) : null;
+            $totalCost = isset($data['total_cost']) && $data['total_cost'] !== '' ? (float)$data['total_cost'] : (float)$loan['total_cost'];
+
+            if (!in_array($status, ['Active', 'Returned', 'Overdue'], true)) {
+                throw new InvalidArgumentException("Invalid loan status.");
+            }
+
+            if ($totalCost < 0) {
+                throw new InvalidArgumentException("Total cost cannot be negative.");
+            }
+
+            if ($guitarId <= 0 || $customerId <= 0) {
+                throw new InvalidArgumentException("Please select a valid guitar and customer.");
+            }
+
+            if (strtotime($dueDate) < strtotime($loanDate)) {
+                throw new InvalidArgumentException("Due date cannot be earlier than loan date.");
+            }
+
+            $guitarModel = new Guitar($this->db);
+            $targetGuitar = $guitarModel->getGuitarById($guitarId);
+            if (!$targetGuitar) {
+                throw new InvalidArgumentException("Target guitar does not exist.");
+            }
+
+            $customerModel = new Customer($this->db);
+            if (!$customerModel->getCustomerById($customerId)) {
+                throw new InvalidArgumentException("Target customer does not exist.");
+            }
+
+            // Handle return date semantics based on status
+            if ($status === 'Returned') {
+                if (empty($returnDate)) {
+                    $returnDate = date('Y-m-d');
+                }
+            } else {
+                $returnDate = null;
+            }
+
+            // Inventory state transition
+            $oldGuitarId = (int)$loan['guitar_id'];
+            $oldHolding = ($loan['status'] !== 'Returned');
+            $newHolding = ($status !== 'Returned');
+
             if ($oldGuitarId === $guitarId) {
                 if ($oldHolding && !$newHolding) {
                     // Transitioned from Active/Overdue to Returned -> return 1 stock
@@ -247,10 +268,11 @@ class Loan {
                     $stmtStock->execute([$guitarId]);
                 } elseif (!$oldHolding && $newHolding) {
                     // Transitioned from Returned back to Active/Overdue -> allocate 1 stock
+                    // Status computed from pre-decrement value first (see createLoan note)
                     $stmtStock = $this->db->prepare("
                         UPDATE guitars 
-                        SET available_stock = available_stock - 1,
-                            availability_status = CASE WHEN available_stock - 1 > 0 THEN 'Available' ELSE 'Unavailable' END
+                        SET availability_status = CASE WHEN available_stock > 1 THEN 'Available' ELSE 'Unavailable' END,
+                            available_stock = available_stock - 1
                         WHERE id = ? AND available_stock > 0
                     ");
                     $stmtStock->execute([$guitarId]);
@@ -272,10 +294,11 @@ class Loan {
 
                 if ($newHolding) {
                     // Claim stock on new guitar
+                    // Status computed from pre-decrement value first (see createLoan note)
                     $stmtNew = $this->db->prepare("
                         UPDATE guitars 
-                        SET available_stock = available_stock - 1,
-                            availability_status = CASE WHEN available_stock - 1 > 0 THEN 'Available' ELSE 'Unavailable' END
+                        SET availability_status = CASE WHEN available_stock > 1 THEN 'Available' ELSE 'Unavailable' END,
+                            available_stock = available_stock - 1
                         WHERE id = ? AND available_stock > 0
                     ");
                     $stmtNew->execute([$guitarId]);
@@ -321,13 +344,16 @@ class Loan {
      * Delete a loan record, safely returning allocated stock if the loan was active.
      */
     public function deleteLoan(int $id): bool {
-        $loan = $this->getLoanById($id);
-        if (!$loan) {
-            throw new InvalidArgumentException("Loan transaction with ID {$id} not found.");
-        }
-
         $this->db->beginTransaction();
         try {
+            // Lock the row so a concurrent double submit cannot restore stock twice
+            $stmtLock = $this->db->prepare("SELECT status, guitar_id FROM loans WHERE id = ? FOR UPDATE");
+            $stmtLock->execute([$id]);
+            $loan = $stmtLock->fetch(PDO::FETCH_ASSOC);
+            if (!$loan) {
+                throw new InvalidArgumentException("Loan transaction with ID {$id} not found.");
+            }
+
             // If loan was holding stock, restore it to inventory
             if ($loan['status'] !== 'Returned') {
                 $stmtStock = $this->db->prepare("

@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('Asia/Jakarta');
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -8,6 +10,10 @@ require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/class/Guitar.php';
 require_once __DIR__ . '/class/Customer.php';
 require_once __DIR__ . '/class/Loan.php';
+
+if (empty($_SESSION['csrf'])) {
+    $_SESSION['csrf'] = bin2hex(random_bytes(16));
+}
 
 function setFlash(string $type, string $message): void {
     $_SESSION['flash'] = [
@@ -23,6 +29,18 @@ function getFlash(): ?array {
         return $flash;
     }
     return null;
+}
+
+function csrfField(): string {
+    return '<input type="hidden" name="csrf" value="' . htmlspecialchars($_SESSION['csrf'], ENT_QUOTES, 'UTF-8') . '">';
+}
+
+function csrfVerify(): void {
+    if (!isset($_POST['csrf']) || !hash_equals($_SESSION['csrf'], (string)$_POST['csrf'])) {
+        setFlash('danger', 'Invalid security token. Please try again.');
+        header('Location: index.php');
+        exit;
+    }
 }
 
 $databaseConnected = false;
@@ -50,6 +68,7 @@ try {
 // POST Request Handling (CRUD Actions)
 // -------------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $databaseConnected) {
+    csrfVerify();
     $page = $_GET['page'] ?? 'dashboard';
     $postAction = $_POST['action'] ?? '';
 
@@ -158,7 +177,7 @@ if ($databaseConnected) {
         $loans = $loanModel->getAllLoans();
 
         $totalGuitars = count($guitars);
-        $availableGuitars = count(array_filter($guitars, fn($g) => (int)$g['available_stock'] > 0));
+        $availableGuitars = array_sum(array_column($guitars, 'available_stock'));
         $totalCustomers = count($customers);
         $activeLoans = count(array_filter($loans, fn($l) => $l['status'] === 'Active'));
         $overdueLoans = count(array_filter($loans, fn($l) => $l['status'] === 'Overdue'));
@@ -243,7 +262,7 @@ if ($databaseConnected) {
                                 </div>
                             </div>
                             <div class="stat-number"><?= $totalGuitars ?></div>
-                            <div class="stat-subtext"><span class="subtext-pill"><?= $availableGuitars ?> available</span> in stock</div>
+                            <div class="stat-subtext"><span class="subtext-pill"><?= $availableGuitars ?> available unit(s)</span> in stock</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-header">

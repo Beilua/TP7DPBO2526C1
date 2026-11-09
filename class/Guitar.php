@@ -188,27 +188,6 @@ class Guitar {
     }
 
     /**
-     * Synchronize guitar available stock and availability status based on total stock and active loans.
-     */
-    public function syncAvailability(int $id): bool {
-        $guitar = $this->getGuitarById($id);
-        if (!$guitar) {
-            return false;
-        }
-
-        $activeLoans = $this->getActiveLoansCount($id);
-        $availableStock = max(0, (int)$guitar['stock'] - $activeLoans);
-        $availabilityStatus = ($availableStock > 0) ? 'Available' : 'Unavailable';
-
-        $stmt = $this->db->prepare("
-            UPDATE guitars 
-            SET available_stock = ?, availability_status = ? 
-            WHERE id = ?
-        ");
-        return $stmt->execute([$availableStock, $availabilityStatus, $id]);
-    }
-
-    /**
      * Process an uploaded guitar image, validating format and size, saving to assets/guitars/.
      */
     public function handleImageUpload(array $file): ?string {
