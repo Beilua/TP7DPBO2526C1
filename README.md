@@ -173,16 +173,16 @@ Semua exception dari class Model ditangkap di `index.php:153-158` → disimpan s
 
 - **Dashboard** — ringkasan statistik dan 5 transaksi terbaru:
 
-  [documentation/dashboard.mp4](documentation/dashboard.mp4)
+  [documentation/dashboard.mp4](https://github.com/user-attachments/assets/09c13471-a841-4bba-9458-b8fcddc9bb59)
 
 - **Guitars CRUD** — tambah, edit, dan hapus inventaris gitar:
 
-  [documentation/guitars-crud.mp4](documentation/guitars-crud.mp4)
+  [documentation/guitars-crud.mp4](https://github.com/user-attachments/assets/bac964a8-240c-4669-982b-8aaaf02df5d9)
 
 - **Customers CRUD** — tambah, edit, dan hapus data pelanggan:
 
-  [documentation/customers-crud.mp4](documentation/customers-crud.mp4)
+  [documentation/customers-crud.mp4](https://github.com/user-attachments/assets/1b456f7a-bafd-4f7b-aaa8-111925cb7ca2)
 
 - **Loans CRUD** — buat, edit, hapus, dan return pinjaman gitar:
 
-  [documentation/loans-crud.mp4](documentation/loans-crud.mp4)
+  [documentation/loans-crud.mp4](https://github.com/user-attachments/assets/2a1d9497-4286-4809-b976-ad38b73181dc)
